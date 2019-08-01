@@ -27,7 +27,7 @@ public class WebClientServiceImpl implements WebClientService {
                     if (ar.succeeded()) {
                         resultHandler.handle(Future.succeededFuture(ar.result().bodyAsJsonObject()));
                     } else {
-                        LOGGER.error("No response from CKAN.\n\n" + ar.cause().getMessage());
+                        LOGGER.error("No response from adapter.", ar.cause());
                         resultHandler.handle(Future.failedFuture(ar.cause()));
                     }
                 });
@@ -43,7 +43,7 @@ public class WebClientServiceImpl implements WebClientService {
                     if (ar.succeeded()) {
                         resultHandler.handle(Future.succeededFuture(ar.result().bodyAsJsonObject()));
                     } else {
-                        LOGGER.error("No response from CKAN.\n\n" + ar.cause().getMessage());
+                        LOGGER.error("No response from adapter", ar.cause());
                         resultHandler.handle(Future.failedFuture(ar.cause()));
                     }
                 });
