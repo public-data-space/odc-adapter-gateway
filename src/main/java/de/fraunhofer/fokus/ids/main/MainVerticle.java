@@ -2,6 +2,9 @@ package de.fraunhofer.fokus.ids.main;
 
 import de.fraunhofer.fokus.ids.services.webclient.WebClientService;
 import de.fraunhofer.fokus.ids.services.webclient.WebClientServiceVerticle;
+import io.vertx.config.ConfigRetriever;
+import io.vertx.config.ConfigRetrieverOptions;
+import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
@@ -20,6 +23,8 @@ public class MainVerticle extends AbstractVerticle {
     private static Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class.getName());
     private Router router;
     private WebClientService webClientService;
+    private int configManagerPort;
+    private String configManagerHost;
 
     @Override
     public void start(Future<Void> startFuture) {
@@ -36,6 +41,23 @@ public class MainVerticle extends AbstractVerticle {
             }
         });
         createHttpServer();
+
+        ConfigStoreOptions confStore = new ConfigStoreOptions()
+                .setType("env");
+
+        ConfigRetrieverOptions options = new ConfigRetrieverOptions().addStore(confStore);
+
+        ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
+
+        retriever.getConfig(ar -> {
+            if (ar.succeeded()) {
+                this.configManagerPort = ar.result().getInteger("CONFIG_MANAGER_PORT");
+                this.configManagerHost = ar.result().getString("CONFIG_MANAGER_URL");
+            } else {
+                LOGGER.info("Config could not be retrieved.", ar.cause());
+            }
+        });
+
     }
 
     private void createHttpServer() {
@@ -69,12 +91,12 @@ public class MainVerticle extends AbstractVerticle {
                 supported(routingContext.request().getParam("name"), reply -> reply(reply, routingContext.response())));
 
         LOGGER.info("Starting Adapter Gateway...");
-        server.requestHandler(router).listen(8093);
+        server.requestHandler(router).listen(8080);
         LOGGER.info("Adapter Gateway successfully started.");
     }
 
     private void supported(String name, Handler<AsyncResult<JsonObject>> resultHandler){
-        webClientService.get(8094, "localhost","/getAdapter/"+name, reply -> {
+        webClientService.get(configManagerPort, configManagerHost,"/getAdapter/"+name, reply -> {
             if(reply.succeeded()){
                 webClientService.get(reply.result().getInteger("port"), reply.result().getString("host"), "/supported/", reply2 -> {
                     if(reply2.succeeded()){
@@ -93,7 +115,7 @@ public class MainVerticle extends AbstractVerticle {
     }
 
     private void getFile(String name, JsonObject jsonObject, Handler<AsyncResult<JsonObject>> resultHandler){
-        webClientService.get(8094, "localhost","/getAdapter/"+name, reply -> {
+        webClientService.get(configManagerPort, configManagerHost,"/getAdapter/"+name, reply -> {
             if(reply.succeeded()){
                 webClientService.post(reply.result().getInteger("port"), reply.result().getString("host"), "/getFile", jsonObject, reply2 -> {
                     if(reply2.succeeded()){
@@ -112,7 +134,7 @@ public class MainVerticle extends AbstractVerticle {
     }
 
     private void delete(String name, Long id, Handler<AsyncResult<JsonObject>> resultHandler){
-        webClientService.get(8094, "localhost","/getAdapter/"+name, reply -> {
+        webClientService.get(configManagerPort, configManagerHost,"/getAdapter/"+name, reply -> {
             if(reply.succeeded()){
                 webClientService.get(reply.result().getInteger("port"), reply.result().getString("host"), "/create/"+id, reply2 -> {
                     if(reply2.succeeded()){
@@ -131,7 +153,7 @@ public class MainVerticle extends AbstractVerticle {
     }
 
     private void create(String name, JsonObject request, Handler<AsyncResult<JsonObject>> resultHandler){
-        webClientService.get(8094, "localhost","/getAdapter/"+name, reply -> {
+        webClientService.get(configManagerPort, configManagerHost,"/getAdapter/"+name, reply -> {
            if(reply.succeeded()){
                 webClientService.post(reply.result().getInteger("port"), reply.result().getString("host"), "/create", request, reply2 -> {
                     if(reply2.succeeded()){
