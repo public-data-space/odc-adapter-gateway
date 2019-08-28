@@ -25,6 +25,7 @@ public class MainVerticle extends AbstractVerticle {
     private WebClientService webClientService;
     private int configManagerPort;
     private String configManagerHost;
+    private int servicePort;
 
     @Override
     public void start(Future<Void> startFuture) {
@@ -40,7 +41,6 @@ public class MainVerticle extends AbstractVerticle {
                 this.webClientService = WebClientService.createProxy(vertx, "de.fraunhofer.fokus.ids.webServiceClient");
             }
         });
-        createHttpServer();
 
         ConfigStoreOptions confStore = new ConfigStoreOptions()
                 .setType("env");
@@ -53,6 +53,8 @@ public class MainVerticle extends AbstractVerticle {
             if (ar.succeeded()) {
                 this.configManagerPort = ar.result().getInteger("CONFIG_MANAGER_PORT");
                 this.configManagerHost = ar.result().getString("CONFIG_MANAGER_URL");
+                this.servicePort = ar.result().getInteger("SERVICE_PORT");
+                createHttpServer();
             } else {
                 LOGGER.info("Config could not be retrieved.", ar.cause());
             }
@@ -91,8 +93,8 @@ public class MainVerticle extends AbstractVerticle {
                 supported(routingContext.request().getParam("name"), reply -> reply(reply, routingContext.response())));
 
         LOGGER.info("Starting Adapter Gateway...");
-        server.requestHandler(router).listen(8080);
-        LOGGER.info("Adapter Gateway successfully started.");
+        server.requestHandler(router).listen(servicePort);
+        LOGGER.info("Adapter Gateway successfully started on port "+servicePort);
     }
 
     private void supported(String name, Handler<AsyncResult<JsonObject>> resultHandler){
