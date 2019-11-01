@@ -81,7 +81,7 @@ public class MainVerticle extends AbstractVerticle {
         router.route().handler(BodyHandler.create());
 
         router.post("/create/:name").handler(routingContext ->
-                    create(routingContext.request().getParam("name"), routingContext.getBodyAsJson(), reply -> reply(reply, routingContext.response())));
+                create(routingContext.request().getParam("name"), routingContext.getBodyAsJson(), reply -> reply(reply, routingContext.response())));
 
         router.route("/delete/:name/:id").handler(routingContext ->
                 delete(routingContext.request().getParam("name"), Long.parseLong(routingContext.request().getParam("id")), reply -> reply(reply, routingContext.response())));
@@ -156,7 +156,7 @@ public class MainVerticle extends AbstractVerticle {
 
     private void create(String name, JsonObject request, Handler<AsyncResult<JsonObject>> resultHandler){
         webClientService.get(configManagerPort, configManagerHost,"/getAdapter/"+name, reply -> {
-           if(reply.succeeded()){
+            if(reply.succeeded()){
                 webClientService.post(reply.result().getInteger("port"), reply.result().getString("host"), "/create", request, reply2 -> {
                     if(reply2.succeeded()){
                         resultHandler.handle(Future.succeededFuture(reply2.result()));
@@ -166,10 +166,10 @@ public class MainVerticle extends AbstractVerticle {
                         resultHandler.handle(Future.failedFuture(reply2.cause()));
                     }
                 });
-           }
-           else{
-               LOGGER.info("Adapter could not be retrieved.",reply.cause());
-           }
+            }
+            else{
+                LOGGER.info("Adapter could not be retrieved.",reply.cause());
+            }
         });
     }
 
