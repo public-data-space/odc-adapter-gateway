@@ -7,7 +7,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.client.WebClient;
-
+/**
+ * @author Vincent Bohlen, vincent.bohlen@fokus.fraunhofer.de
+ */
 public class WebClientServiceImpl implements WebClientService {
 
     private Logger LOGGER = LoggerFactory.getLogger(WebClientServiceImpl.class.getName());

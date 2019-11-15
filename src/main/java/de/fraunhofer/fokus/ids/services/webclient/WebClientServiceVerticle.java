@@ -6,10 +6,10 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.serviceproxy.ServiceBinder;
-
+/**
+ * @author Vincent Bohlen, vincent.bohlen@fokus.fraunhofer.de
+ */
 public class WebClientServiceVerticle extends AbstractVerticle {
-
-    private Logger LOGGER = LoggerFactory.getLogger(WebClientServiceVerticle.class.getName());
 
     @Override
     public void start(Future<Void> startFuture) {
