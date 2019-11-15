@@ -18,7 +18,9 @@ import io.vertx.ext.web.handler.CorsHandler;
 import org.apache.http.entity.ContentType;
 
 import java.util.*;
-
+/**
+ * @author Vincent Bohlen, vincent.bohlen@fokus.fraunhofer.de
+ */
 public class MainVerticle extends AbstractVerticle {
     private static Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class.getName());
     private Router router;
@@ -56,7 +58,7 @@ public class MainVerticle extends AbstractVerticle {
                 this.servicePort = ar.result().getInteger("SERVICE_PORT");
                 createHttpServer();
             } else {
-                LOGGER.info("Config could not be retrieved.", ar.cause());
+                LOGGER.error("Config could not be retrieved.", ar.cause());
             }
         });
 
@@ -92,9 +94,51 @@ public class MainVerticle extends AbstractVerticle {
         router.route("/supported/:name").handler(routingContext ->
                 supported(routingContext.request().getParam("name"), reply -> reply(reply, routingContext.response())));
 
+        router.route("/getDataSourceFormSchema/:type").handler(routingContext ->
+                getDataSourceFormSchema(routingContext.request().getParam("type"), reply -> reply(reply, routingContext.response())));
+        router.route("/getDataAssetFormSchema/:type").handler(routingContext ->
+                getDataAssetFormSchema(routingContext.request().getParam("type"), reply -> reply(reply, routingContext.response())));
         LOGGER.info("Starting Adapter Gateway...");
         server.requestHandler(router).listen(servicePort);
         LOGGER.info("Adapter Gateway successfully started on port "+servicePort);
+    }
+
+    private void getDataAssetFormSchema(String type, Handler<AsyncResult<JsonObject>> resultHandler ){
+        webClientService.get(configManagerPort, configManagerHost,"/getAdapter/"+type, reply -> {
+            if(reply.succeeded()){
+                webClientService.get(reply.result().getInteger("port"), reply.result().getString("host"), "/getDataAssetFormSchema/", reply2 -> {
+                    if(reply2.succeeded()){
+                        resultHandler.handle(Future.succeededFuture(reply2.result()));
+                    }
+                    else{
+                        LOGGER.error("Create failed in adapter",reply2.cause());
+                        resultHandler.handle(Future.failedFuture(reply2.cause()));
+                    }
+                });
+            }
+            else{
+                LOGGER.error("Adapter could not be retrieved.",reply.cause());
+            }
+        });
+    }
+
+    private void getDataSourceFormSchema(String type, Handler<AsyncResult<JsonObject>> resultHandler){
+        webClientService.get(configManagerPort, configManagerHost,"/getAdapter/"+type, reply -> {
+            if(reply.succeeded()){
+                webClientService.get(reply.result().getInteger("port"), reply.result().getString("host"), "/getDataSourceFormSchema/", reply2 -> {
+                    if(reply2.succeeded()){
+                        resultHandler.handle(Future.succeededFuture(reply2.result()));
+                    }
+                    else{
+                        LOGGER.error("Create failed in adapter",reply2.cause());
+                        resultHandler.handle(Future.failedFuture(reply2.cause()));
+                    }
+                });
+            }
+            else{
+                LOGGER.error("Adapter could not be retrieved.",reply.cause());
+            }
+        });
     }
 
     private void supported(String name, Handler<AsyncResult<JsonObject>> resultHandler){
@@ -105,13 +149,13 @@ public class MainVerticle extends AbstractVerticle {
                         resultHandler.handle(Future.succeededFuture(reply2.result()));
                     }
                     else{
-                        LOGGER.info("Create failed in adapter",reply2.cause());
+                        LOGGER.error("Create failed in adapter",reply2.cause());
                         resultHandler.handle(Future.failedFuture(reply2.cause()));
                     }
                 });
             }
             else{
-                LOGGER.info("Adapter could not be retrieved.",reply.cause());
+                LOGGER.error("Adapter could not be retrieved.",reply.cause());
             }
         });
     }
@@ -124,13 +168,13 @@ public class MainVerticle extends AbstractVerticle {
                         resultHandler.handle(Future.succeededFuture(reply2.result()));
                     }
                     else{
-                        LOGGER.info("Create failed in adapter",reply2.cause());
+                        LOGGER.error("Create failed in adapter",reply2.cause());
                         resultHandler.handle(Future.failedFuture(reply2.cause()));
                     }
                 });
             }
             else{
-                LOGGER.info("Adapter could not be retrieved.",reply.cause());
+                LOGGER.error("Adapter could not be retrieved.",reply.cause());
             }
         });
     }
@@ -143,13 +187,13 @@ public class MainVerticle extends AbstractVerticle {
                         resultHandler.handle(Future.succeededFuture(reply2.result()));
                     }
                     else{
-                        LOGGER.info("Create failed in adapter",reply2.cause());
+                        LOGGER.error("Create failed in adapter",reply2.cause());
                         resultHandler.handle(Future.failedFuture(reply2.cause()));
                     }
                 });
             }
             else{
-                LOGGER.info("Adapter could not be retrieved.",reply.cause());
+                LOGGER.error("Adapter could not be retrieved.",reply.cause());
             }
         });
     }
@@ -162,13 +206,13 @@ public class MainVerticle extends AbstractVerticle {
                         resultHandler.handle(Future.succeededFuture(reply2.result()));
                     }
                     else{
-                        LOGGER.info("Create failed in adapter",reply2.cause());
+                        LOGGER.error("Create failed in adapter",reply2.cause());
                         resultHandler.handle(Future.failedFuture(reply2.cause()));
                     }
                 });
             }
             else{
-                LOGGER.info("Adapter could not be retrieved.",reply.cause());
+                LOGGER.error("Adapter could not be retrieved.",reply.cause());
             }
         });
     }
