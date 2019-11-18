@@ -182,12 +182,12 @@ public class MainVerticle extends AbstractVerticle {
     private void delete(String name, Long id, Handler<AsyncResult<JsonObject>> resultHandler){
         webClientService.get(configManagerPort, configManagerHost,"/getAdapter/"+name, reply -> {
             if(reply.succeeded()){
-                webClientService.get(reply.result().getInteger("port"), reply.result().getString("host"), "/create/"+id, reply2 -> {
+                webClientService.get(reply.result().getInteger("port"), reply.result().getString("host"), "/delete/"+id, reply2 -> {
                     if(reply2.succeeded()){
                         resultHandler.handle(Future.succeededFuture(reply2.result()));
                     }
                     else{
-                        LOGGER.error("Create failed in adapter",reply2.cause());
+                        LOGGER.error("Delete failed in adapter",reply2.cause());
                         resultHandler.handle(Future.failedFuture(reply2.cause()));
                     }
                 });
